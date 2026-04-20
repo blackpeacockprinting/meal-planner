@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly Meal Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #fdf6ec; --warm-white: #fffbf5; --terracotta: #c4614a;
+  --sage: #7a9e7e; --sage-light: #b5d4b8; --ink: #2c2416; --ink-light: #5a4e3c;
+  --gold: #c9963a; --gold-light: #f0d49a; --blush: #f2d5c4; --border: #e0d0b8;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--cream); font-family: 'Lato', sans-serif; color: var(--ink); min-height: 100vh; }
+.container { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; }
+
+/* HEADER */
+header { text-align: center; margin-bottom: 40px; padding-bottom: 28px; border-bottom: 2px solid var(--border); }
+.header-label { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: var(--terracotta); font-weight: 700; margin-bottom: 10px; }
+h1 { font-family: 'Playfair Display', serif; font-size: clamp(32px, 5vw, 58px); font-weight: 900; color: var(--ink); line-height: 1.1; }
+h1 span { color: var(--terracotta); }
+.header-sub { margin-top: 8px; font-size: 14px; color: var(--ink-light); font-weight: 300; letter-spacing: 1px; }
+
+/* TABS */
+.tabs { display: flex; gap: 4px; margin-bottom: 30px; background: var(--blush); padding: 4px; border-radius: 12px; width: fit-content; }
+.tab-btn { padding: 10px 24px; border: none; background: transparent; border-radius: 9px; font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-light); cursor: pointer; transition: all 0.2s; }
+.tab-btn.active { background: var(--warm-white); color: var(--terracotta); box-shadow: 0 2px 8px rgba(196,97,74,0.15); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* CARDS */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 18px; margin-bottom: 18px; }
+.card { background: var(--warm-white); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 12px rgba(44,36,22,0.06); transition: transform 0.2s, box-shadow 0.2s; }
+.card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(44,36,22,0.10); }
+.card-head { padding: 13px 18px 11px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
+.card-body { padding: 15px 18px 18px; }
+.day-name { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 700; }
+.day-num { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--ink-light); opacity: 0.55; }
+.tag { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 3px 7px; border-radius: 4px; margin-left: auto; }
+.tag-q { background: var(--sage-light); color: #2d5a30; }
+.tag-b { background: var(--gold-light); color: #7a5a10; }
+.tag-l { background: var(--blush); color: #7a3020; }
+.meal-icon { font-size: 26px; margin-bottom: 8px; }
+.meal-name { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; margin-bottom: 6px; line-height: 1.3; }
+.meal-desc { font-size: 13px; color: var(--ink-light); line-height: 1.6; font-weight: 300; }
+
+/* SECTION TITLE */
+.sec-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 900; margin-bottom: 22px; display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+.sec-title::after { content: ''; flex: 1; height: 2px; background: linear-gradient(to right, var(--border), transparent); }
+
+/* NOTE BOX */
+.note { background: var(--gold-light); border: 1px solid var(--gold); border-radius: 12px; padding: 13px 17px; margin-bottom: 26px; font-size: 13px; color: #5a3e10; }
+
+/* RECIPE CARDS */
+.recipe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 22px; }
+.recipe-card { background: var(--warm-white); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 12px rgba(44,36,22,0.06); }
+.rec-head { padding: 16px 20px 13px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 13px; }
+.rec-icon { width: 42px; height: 42px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 21px; flex-shrink: 0; }
+.bg-t { background: var(--blush); } .bg-s { background: var(--sage-light); } .bg-g { background: var(--gold-light); }
+.rec-title { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; line-height: 1.3; }
+.rec-time { font-size: 11px; color: var(--ink-light); margin-top: 2px; }
+.rec-body { padding: 14px 20px 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.sec-lbl { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--terracotta); margin-bottom: 7px; }
+.ing-list { list-style: none; }
+.ing-list li { font-size: 12.5px; color: var(--ink-light); line-height: 1.7; padding-left: 11px; position: relative; font-weight: 300; }
+.ing-list li::before { content: '·'; position: absolute; left: 0; color: var(--terracotta); font-weight: 700; }
+.steps-wrap { grid-column: span 2; border-top: 1px solid var(--border); padding-top: 13px; margin-top: 2px; }
+.step { font-size: 12.5px; color: var(--ink-light); line-height: 1.7; margin-bottom: 3px; padding-left: 20px; position: relative; font-weight: 300; }
+.step::before { content: attr(data-n); position: absolute; left: 0; width: 15px; height: 15px; background: var(--terracotta); color: white; border-radius: 50%; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; top: 3px; }
+
+/* SHOPPING LIST */
+.shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 18px; }
+.shop-cat { background: var(--warm-white); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 12px rgba(44,36,22,0.06); }
+.shop-cat-head { padding: 13px 18px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
+.shop-cat-icon { font-size: 19px; }
+.shop-cat-name { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; }
+.shop-cat-body { padding: 12px 18px 16px; }
+.shop-item { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px dashed rgba(180,160,120,0.3); cursor: pointer; user-select: none; }
+.shop-item:last-child { border-bottom: none; }
+.chk { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 4px; flex-shrink: 0; transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white; font-weight: 700; }
+.shop-item.checked .chk { background: var(--sage); border-color: var(--sage); }
+.shop-item.checked .chk::after { content: '✓'; }
+.shop-item.checked .shop-text { text-decoration: line-through; opacity: 0.45; }
+.shop-text { font-size: 13.5px; transition: all 0.2s; }
+.shop-note { font-size: 11px; color: var(--ink-light); margin-left: auto; opacity: 0.7; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="header-label">Home Cooking · Weekly Plan</div>
+  <h1>Our Family <span>Meal Planner</span></h1>
+  <p class="header-sub">11 recipes · weekly schedule · interactive shopping list</p>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('planner')">📅 Weekly Plan</button>
+  <button class="tab-btn" onclick="showTab('recipes')">📖 Recipes</button>
+  <button class="tab-btn" onclick="showTab('shopping')">🛒 Shopping List</button>
+</div>
+
+<!-- WEEKLY PLANNER -->
+<div id="tab-planner" class="tab-content active">
+  <div class="note">💡 <strong>Tip:</strong> Make extra Bolognese sauce on Tuesday and freeze it for up to 3–4 months. Sunday's egg fried rice is perfect for using up leftovers from the week.</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-head"><span class="day-name">Monday</span><span class="day-num">Day 1</span><span class="tag tag-q">Quick</span></div>
+      <div class="card-body"><div class="meal-icon">🫑</div><div class="meal-name">Bell Pepper Pasta + Chicken</div><div class="meal-desc">Fried bell pepper in creamy Half & Half sauce, airfryer chicken, pasta — ready in ~12 min</div></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="day-name">Tuesday</span><span class="day-num">Day 2</span><span class="tag tag-b">Batch Cook</span></div>
+      <div class="card-body"><div class="meal-icon">🍝</div><div class="meal-name">Spaghetti Bolognese</div><div class="meal-desc">Classic meat sauce with tomatoes & Italian seasoning. Make extra to freeze!</div></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="day-name">Wednesday</span><span class="day-num">Day 3</span><span class="tag tag-q">Quick</span></div>
+      <div class="card-body"><div class="meal-icon">🥦</div><div class="meal-name">Rice, Broccoli + Marinated Chicken</div><div class="meal-desc">Sesame broccoli, airfryer marinated chicken over steamed rice</div></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="day-name">Thursday</span><span class="day-num">Day 4</span><span class="tag tag-q">Quick</span></div>
+      <div class="card-body"><div class="meal-icon">🐟</div><div class="meal-name">Tuna Helper + Cauliflower</div><div class="meal-desc">Pasta & cauliflower cooked together, tossed with tuna & Quattro Formaggi</div></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="day-name">Friday</span><span class="day-num">Day 5</span><span class="tag tag-q">Quick</span></div>
+      <div class="card-body"><div class="meal-icon">🍤</div><div class="meal-name">Rice, Shrimp, Carrots & Mandu</div><div class="meal-desc">Sesame soy shrimp, garlic carrots, rice with mandu dumplings on the side</div></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="day-name">Saturday</span><span class="day-num">Day 6</span></div>
+      <div class="card-body"><div class="meal-icon">🌯</div><div class="meal-name">Gimbap</div><div class="meal-desc">Sesame rice rolls with surimi, cucumber, carrot & egg in nori — fun to make together!</div></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="day-name">Sunday</span><span class="day-num">Day 7</span><span class="tag tag-l">Leftovers</span></div>
+      <div class="card-body"><div class="meal-icon">🍳</div><div class="meal-name">Leftover Egg Fried Rice</div><div class="meal-desc">Use up leftover rice, veggies & protein with sesame oil, soy sauce & egg</div></div>
+    </div>
+  </div>
+
+  <div class="sec-title">More Meals in Rotation</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-body"><div class="meal-icon">🌿</div><div class="meal-name">Pasta, Asparagus + Sausage</div><div class="meal-desc">Hillshire sausage, frozen asparagus, pasta with Half & Half or Quattro Formaggi</div></div>
+    </div>
+    <div class="card">
+      <div class="card-body"><div class="meal-icon">🍛</div><div class="meal-name">Curry</div><div class="meal-desc">Chicken, mixed veg (peas, carrots, potatoes, cauliflower), curry packet over rice</div></div>
+    </div>
+    <div class="card">
+      <div class="card-body"><div class="meal-icon">🐠</div><div class="meal-name">Fishsticks / Nuggets + Rice + Cucumber</div><div class="meal-desc">Airfryer fishsticks or nuggets, steamed rice, cucumber with garlic salt</div></div>
+    </div>
+    <div class="card">
+      <div class="card-body"><div class="meal-icon">🥩</div><div class="meal-name">Beef Stroganoff Pasta</div><div class="meal-desc">Minced meat, onions, veg of choice, Quattro Formaggi over pasta</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- RECIPES -->
+<div id="tab-recipes" class="tab-content">
+  <div class="recipe-grid">
+
+    <div class="recipe-card">
+      <div class="rec-head"><div class="rec-icon bg-t">🫑</div><div><div class="rec-title">Bell Pepper Pasta + Chicken</div><div class="rec-time">⏱ ~12 minutes</div></div></div>
+      <div class="rec-body">
+        <div><div class="sec-lbl">Ingredients</div><ul class="ing-list"><li>1 bell pepper</li><li>¼ pkg Half & Half (dairy)</li><li>½ pkg pasta</li><li>2 pieces chicken</li><li>1 tsp oil</li><li>Garlic salt, pepper</li></ul></div>
+        <div><div class="sec-lbl">Notes</div><ul class="ing-list"><li>Season chicken well before airfrying</li></ul></div>
+        <div class="steps-wrap"><div class="sec-lbl">Steps</div>
+          <div class="step" data-n="1">Cut bell pepper small, fry in pan with 1 tsp oil until brown</div>
+          <div class="step" data-n="2">Add Half & Half, garlic salt, pepper — stir</div>
+          <div class="step" data-n="3">Season chicken & cook in airfryer</div>
+          <div class="step" data-n="4">Cook pasta. Done! 💙</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="recipe-card">
+      <div class="rec-head"><div class="rec-icon bg-t">🍝</div><div><div class="rec-title">Spaghetti Bolognese</div><div class="rec-time">⏱ ~10 min + freeze extra</div></div></div>
+      <div class="rec-body">
+        <div><div class="sec-lbl">Ingredients</div><ul class="ing-list"><li>Minced meat</li><li>1 big can diced tomatoes</li><li>1 small can tomato sauce</li><li>Frozen diced onions</li><li>Italian seasoning or German pasta fix (seasoning packet)</li><li>Garlic powder</li><li>Pasta</li><li>1 tsp oil</li></ul></div>
+        <div><div class="sec-lbl">Notes</div><ul class="ing-list"><li>Freeze leftover sauce 3–4 months</li></ul></div>
+        <div class="steps-wrap"><div class="sec-lbl">Steps</div>
+          <div class="step" data-n="1">Brown meat & onions with 1 tsp oil</div>
+          <div class="step" data-n="2">Add salt, pepper, garlic powder, Italian seasoning / pasta fix packet — mix well</div>
+          <div class="step" data-n="3">Add both cans of tomatoes, mix well</div>
+          <div class="step" data-n="4">Cook pasta. Freeze leftover sauce. Done! 💙</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="recipe-card">
+      <div class="rec-head"><div class="rec-icon bg-s">🥦</div><div><div class="rec-title">Rice, Broccoli + Marinated Chicken</div><div class="rec-time">⏱ Easy weeknight</div></div></div>
+      <div class="rec-body">
+        <div><div class="sec-lbl">Ingredients</div><ul class="ing-list"><li>Rice</li><li>Frozen broccoli</li><li>Marinated chicken (pre-frozen)</li><li>1 tsp sesame oil</li><li>Garlic salt</li></ul></div>
+        <div><div class="sec-lbl">Notes</div><ul class="ing-list"><li>Use pre-marinated chicken from freezer</li></ul></div>
+        <div class="steps-wrap"><div class="sec-lbl">Steps</div>
+          <div class="step" data-n="1">Cook rice</div>
+          <div class="step" data-n="2">Cook broccoli in pot, add 1 tsp sesame oil + garlic salt</div>
+          <div class="step" data-n="3">Cook marinated chicken in airfryer. Done! 💙</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="recipe-card">
+      <div class="rec-head"><div class="rec-icon bg-g">🐟</div><div><div class="rec-title">Tuna Helper + Cauliflower</div><div class="rec-time">⏱ One-pot easy</div></div></div>
+      <div class="rec-body">
+        <div><div class="sec-lbl">Ingredients</div><ul class="ing-list"><li>½ pkg pasta</li><li>1 pouch tuna in water</li><li>½ pkg frozen cauliflower</li><li>¼ pkg Half & Half (dairy)</li><li>Quattro Formaggi (4-cheese mix)</li><li>Onion, garlic salt, pepper</li></ul></div>
+        <div><div class="sec-lbl">Notes</div><ul class="ing-list"><li>Cook pasta & cauliflower in same pot</li></ul></div>
+        <div class="steps-wrap"><div class="sec-lbl">Steps</div>
+          <div class="step" data-n="1">Cook pasta ~7 min, add cauliflower to water, finish cooking together — drain</div>
+          <div class="step" data-n="2">Mix tuna, Half & Half, onion, garlic salt, pepper in pot</div>
+          <div class="step" data-n="3">Add pasta & cauliflower, stir in Quattro Formaggi. Done! 💙</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="recipe-card">
+      <div class="rec-head"><div class="rec-icon bg-s">🍤</div><div><div class="rec-title">Rice, Shrimp, Carrots & Mandu</div><div class="rec-time">⏱ Quick & flavourful</div></div></div>
+      <div class="rec-body">
+        <div><div class="sec-lbl">Ingredients</div><ul class="ing-list"><li>Rice</li><li>½ small pkg shrimp</li><li>1 big carrot</li><li>Frozen Mandu dumplings</li><li>Sesame oil</li><li>Garlic salt, garlic powder</li><li>½ tsp soy sauce</li><li>½ tsp butter (optional)</li></ul></div>
+        <div><div class="sec-lbl">Notes</div><ul class="ing-list"><li>Butter adds richness to shrimp</li></ul></div>
+        <div class="steps-wrap"><div class="sec-lbl">Steps</div>
+          <div class="step" data-n="1">Cook rice</div>
+          <div class="step" data-n="2">Cook shrimp in 1 tsp sesame oil, add garlic salt, garlic powder, ½ tsp soy sauce (+ butter if available)</div>
+          <div class="step" data-n="3">Cut carrot in thin strips, add ½ tsp sesame oil + garlic salt</div>
+          <div class="step" data-n="4">Prepare Mandu. Done! 💙</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="recipe-card">
+      <div class="rec-head"><div class="rec-icon bg-g">🍳</div><div><div class="rec-title">Leftover Egg Fried Rice</div><div class="rec-time">⏱ Zero-waste meal</div></div></div>
+      <div class="rec-body">
+        <div><div class="sec-lbl">Ingredients</div><ul class="ing-list"><li>Leftover rice</li><li>1 egg</li><li>Leftover veg (carrots, peas…)</li><li>Leftover shrimp or chicken</li><li>½ tsp + ½ tsp sesame oil</li><li>1 tsp soy sauce</li><li>Garlic salt, garlic powder</li></ul></div>
+        <div><div class="sec-lbl">Notes</div><ul class="ing-list"><li>Perfect Sunday clean-out meal</li></ul></div>
+        <div class="steps-wrap"><div class="sec-lbl">Steps</div>
+          <div class="step" data-n="1">Fry egg in ½ tsp sesame oil until ¾ cooked — remove from pan</div>
+          <div class="step" data-n="2">Fry rice, veggies & protein in ½ tsp sesame oil</div>
+          <div class="step" data-n="3">Add 1 tsp soy sauce, garlic salt, garlic powder — mix well</div>
+          <div class="step" data-n="4">Add egg back. Done! 💙</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="recipe-card">
+      <div class="rec-head"><div class="rec-icon bg-s">🌿</div><div><div class="rec-title">Pasta, Asparagus + Sausage</div><div class="rec-time">⏱ ~20 minutes</div></div></div>
+      <div class="rec-body">
+        <div><div class="sec-lbl">Ingredients</div><ul class="ing-list"><li>½ pkg pasta</li><li>1 pkg frozen asparagus</li><li>Hillshire sausage</li><li>¼ pkg Half & Half (dairy) <em>or</em> Quattro Formaggi</li><li>Garlic salt, pepper, oil</li></ul></div>
+        <div><div class="sec-lbl">Notes</div><ul class="ing-list"><li>Half & Half and Quattro Formaggi are interchangeable here</li></ul></div>
+        <div class="steps-wrap"><div class="sec-lbl">Steps</div>
+          <div class="step" data-n="1">Cook pasta</div>
+          <div class="step" data-n="2">Slice sausage & fry in ½ tsp oil</div>
+          <div class="step" data-n="3">Defrost asparagus in microwave ~2 min, drain & cut into small pieces</div>
+          <div class="step" data-n="4">Fry asparagus with ½ tsp oil, add Half & Half or Quattro Formaggi, garlic salt, pepper</div>
+          <div class="step" data-n="5">Mix pasta with sauce, top with sausage. Done! 💙</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="recipe-card">
+      <div class="rec-head"><div class="rec-icon bg-t">🌯</div><div><div class="rec-title">Gimbap</div><div class="rec-time">⏱ Weekend project</div></div></div>
+      <div class="rec-body">
+        <div><div class="sec-lbl">Ingredients</div><ul class="ing-list"><li>Rice</li><li>Surimi sticks</li><li>Cucumber</li><li>¼ carrot</li><li>1 egg</li><li>Nori (seaweed) sheets</li><li>1 tsp sesame oil, ½ tsp salt</li><li>Garlic salt</li></ul></div>
+        <div><div class="sec-lbl">Notes</div><ul class="ing-list"><li>Cool rice with cling wrap on top</li><li>Flip egg before fully cooked through</li></ul></div>
+        <div class="steps-wrap"><div class="sec-lbl">Steps</div>
+          <div class="step" data-n="1">Cook rice, add 1 tsp sesame oil + ½ tsp salt. Cool with cling wrap on top</div>
+          <div class="step" data-n="2">Cut cucumber in strips; cut carrot in thin strips + add garlic salt</div>
+          <div class="step" data-n="3">Scramble egg, cook in ½ tsp sesame oil, flip before fully cooked through</div>
+          <div class="step" data-n="4">Assemble and roll Gimbap. Done! 💙</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="recipe-card">
+      <div class="rec-head"><div class="rec-icon bg-g">🍛</div><div><div class="rec-title">Curry</div><div class="rec-time">⏱ Cozy dinner</div></div></div>
+      <div class="rec-body">
+        <div><div class="sec-lbl">Ingredients</div><ul class="ing-list"><li>Rice</li><li>Curry seasoning package</li><li>Chicken, cut into pieces</li><li>Peas, carrots, potatoes, cauliflower</li><li>½ tsp sesame oil</li></ul></div>
+        <div><div class="sec-lbl">Notes</div><ul class="ing-list"><li>Mix & match veg to taste</li></ul></div>
+        <div class="steps-wrap"><div class="sec-lbl">Steps</div>
+          <div class="step" data-n="1">Cook rice</div>
+          <div class="step" data-n="2">Fry chicken in deep pan with ½ tsp sesame oil</div>
+          <div class="step" data-n="3">Add vegetables, then add curry package. Done! 💙</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="recipe-card">
+      <div class="rec-head"><div class="rec-icon bg-t">🐠</div><div><div class="rec-title">Fishsticks / Nuggets + Rice + Cucumber</div><div class="rec-time">⏱ Super quick</div></div></div>
+      <div class="rec-body">
+        <div><div class="sec-lbl">Ingredients</div><ul class="ing-list"><li>Rice</li><li>Cucumber</li><li>Fishsticks or chicken nuggets</li><li>Garlic salt</li></ul></div>
+        <div><div class="sec-lbl">Notes</div><ul class="ing-list"><li>Great easy kids meal</li></ul></div>
+        <div class="steps-wrap"><div class="sec-lbl">Steps</div>
+          <div class="step" data-n="1">Cook rice</div>
+          <div class="step" data-n="2">Cook fishsticks or nuggets in airfryer</div>
+          <div class="step" data-n="3">Cube cucumber, sprinkle garlic salt. Done! 💙</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="recipe-card">
+      <div class="rec-head"><div class="rec-icon bg-t">🥩</div><div><div class="rec-title">Beef Stroganoff Pasta</div><div class="rec-time">⏱ Hearty dinner</div></div></div>
+      <div class="rec-body">
+        <div><div class="sec-lbl">Ingredients</div><ul class="ing-list"><li>Minced meat</li><li>Onions</li><li>½ pkg pasta</li><li>Quattro Formaggi (4-cheese mix)</li><li>Broccoli / cauliflower / peas</li><li>½ tsp oil</li></ul></div>
+        <div><div class="sec-lbl">Notes</div><ul class="ing-list"><li>Any veg of your choice works</li></ul></div>
+        <div class="steps-wrap"><div class="sec-lbl">Steps</div>
+          <div class="step" data-n="1">Brown minced meat in ½ tsp oil, add onions</div>
+          <div class="step" data-n="2">Add vegetables of choice</div>
+          <div class="step" data-n="3">Stir in Quattro Formaggi</div>
+          <div class="step" data-n="4">Cook pasta. Done! 💙</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SHOPPING LIST -->
+<div id="tab-shopping" class="tab-content">
+  <div class="note">🛒 Tap any item to check it off as you shop. This list covers all 11 recipes — adjust quantities to how many meals you plan to make this week.</div>
+  <div class="shop-grid">
+
+    <div class="shop-cat">
+      <div class="shop-cat-head"><span class="shop-cat-icon">🥩</span><span class="shop-cat-name">Meat & Protein</span></div>
+      <div class="shop-cat-body">
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Minced meat</span><span class="shop-note">Bolognese + Stroganoff</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Chicken pieces</span><span class="shop-note">Bell pepper, curry</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Marinated chicken (frozen)</span><span class="shop-note">Rice bowl</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Shrimp (small pkg, frozen)</span><span class="shop-note">Shrimp rice</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Tuna in water (1 pouch)</span><span class="shop-note">Tuna helper</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Hillshire sausage</span><span class="shop-note">Pasta + asparagus</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Fishsticks or nuggets (frozen)</span><span class="shop-note">Quick dinner</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Surimi sticks</span><span class="shop-note">Gimbap</span></div>
+      </div>
+    </div>
+
+    <div class="shop-cat">
+      <div class="shop-cat-head"><span class="shop-cat-icon">🥛</span><span class="shop-cat-name">Dairy & Cheese</span></div>
+      <div class="shop-cat-body">
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Half & Half (dairy)</span><span class="shop-note">Bell pepper pasta, tuna helper, asparagus pasta</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Quattro Formaggi (4-cheese mix)</span><span class="shop-note">Tuna helper, stroganoff, asparagus pasta</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Butter (optional)</span><span class="shop-note">Shrimp rice</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Eggs</span><span class="shop-note">Fried rice, gimbap</span></div>
+      </div>
+    </div>
+
+    <div class="shop-cat">
+      <div class="shop-cat-head"><span class="shop-cat-icon">🥦</span><span class="shop-cat-name">Vegetables (Fresh)</span></div>
+      <div class="shop-cat-body">
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Bell pepper</span><span class="shop-note">Bell pepper pasta</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Carrots (2–3 big)</span><span class="shop-note">Shrimp rice, gimbap, curry</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Cucumbers</span><span class="shop-note">Gimbap, fishsticks meal</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Onions</span><span class="shop-note">Bolognese, stroganoff</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Potatoes</span><span class="shop-note">Curry</span></div>
+      </div>
+    </div>
+
+    <div class="shop-cat">
+      <div class="shop-cat-head"><span class="shop-cat-icon">🧊</span><span class="shop-cat-name">Frozen Vegetables</span></div>
+      <div class="shop-cat-body">
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Frozen broccoli</span><span class="shop-note">Rice bowl</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Frozen cauliflower</span><span class="shop-note">Tuna helper, curry, stroganoff</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Frozen asparagus (1 pkg)</span><span class="shop-note">Asparagus pasta</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Frozen diced onions</span><span class="shop-note">Bolognese</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Frozen peas</span><span class="shop-note">Curry, stroganoff</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Frozen Mandu dumplings</span><span class="shop-note">Shrimp rice meal</span></div>
+      </div>
+    </div>
+
+    <div class="shop-cat">
+      <div class="shop-cat-head"><span class="shop-cat-icon">🍝</span><span class="shop-cat-name">Pasta, Rice & Grains</span></div>
+      <div class="shop-cat-body">
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Pasta (2–3 packages)</span><span class="shop-note">Multiple meals</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Rice</span><span class="shop-note">Multiple meals</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Nori (seaweed) sheets</span><span class="shop-note">Gimbap</span></div>
+      </div>
+    </div>
+
+    <div class="shop-cat">
+      <div class="shop-cat-head"><span class="shop-cat-icon">🥫</span><span class="shop-cat-name">Canned & Jarred</span></div>
+      <div class="shop-cat-body">
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Big can diced tomatoes</span><span class="shop-note">Bolognese</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Small can tomato sauce</span><span class="shop-note">Bolognese</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Curry seasoning package</span><span class="shop-note">Curry</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">German pasta fix (seasoning packet)</span><span class="shop-note">Bolognese alternative</span></div>
+      </div>
+    </div>
+
+    <div class="shop-cat">
+      <div class="shop-cat-head"><span class="shop-cat-icon">🧂</span><span class="shop-cat-name">Pantry & Condiments</span></div>
+      <div class="shop-cat-body">
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Sesame oil</span><span class="shop-note">Many meals</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Soy sauce</span><span class="shop-note">Fried rice, shrimp</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Garlic salt</span><span class="shop-note">Many meals</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Garlic powder</span><span class="shop-note">Bolognese, fried rice</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Italian seasoning</span><span class="shop-note">Bolognese</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Salt & pepper</span><span class="shop-note">General</span></div>
+        <div class="shop-item" onclick="toggle(this)"><div class="chk"></div><span class="shop-text">Cooking oil</span><span class="shop-note">General frying</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<script>
+function showTab(id) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+function toggle(el) {
+  el.classList.toggle('checked');
+}
+</script>
+</body>
+</html>
